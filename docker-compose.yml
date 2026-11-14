@@ -1,0 +1,26 @@
+# Na etapie programowania tylko infrastruktura (SPEC, sekcja 17):
+#   docker compose up -d
+# Backend i frontend uruchamiasz z IDE.
+
+services:
+  postgres:
+    # Wersja przypięta na stałe; ta sama musi być w konfiguracji Testcontainers.
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-memoflow}
+      POSTGRES_USER: ${DB_USER:-memoflow}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Ustaw DB_PASSWORD w pliku .env}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      # Od PostgreSQL 18 wolumen montuje się w /var/lib/postgresql (wcześniej .../data).
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      # $$ = zmienna z wnętrza kontenera, nie z .env
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres-data:
