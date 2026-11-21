@@ -1,0 +1,18 @@
+### logowanie: zapamiętuje token w zmiennej {{token}}
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{"email": "anna@example.com", "password": "Haslo1234"}
+
+> {% client.global.set("token", response.body.token); %}
+
+### bez tokenu → 401 „Wymagane logowanie”
+GET http://localhost:8080/api/decks
+
+### z tokenem → 404, bo Security przepuściło, a kontrolera talii jeszcze nie ma
+GET http://localhost:8080/api/decks
+Authorization: Bearer {{token}}
+
+### zepsuty token → 401
+GET http://localhost:8080/api/decks
+Authorization: Bearer abc.def.ghi
